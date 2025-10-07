@@ -3,29 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ashish & Maa Chat</title>
+  <title>Chat - Ashish & Maa</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="login">
-    <h2>Welcome</h2>
-    <select id="userSelect">
+  <div class="login-container" id="loginDiv">
+    <h2>Welcome 👋</h2>
+    <select id="usernameSelect">
       <option value="">Select User</option>
-      <option value="Ashish">Ashish</option>
-      <option value="Maa">Maa</option>
+      <option value="ashish">Ashish</option>
+      <option value="maa">Maa</option>
     </select>
     <button id="loginBtn">Login</button>
   </div>
 
-  <div class="chat" style="display:none;">
-    <div class="header">
-      <h3 id="chatTitle"></h3>
+  <div class="chat-container" id="chatDiv" style="display:none;">
+    <div class="chat-header">
+      <h2 id="chatWith">Chat</h2>
       <button id="logoutBtn">Logout</button>
     </div>
-    <div id="chatBox"></div>
+
+    <div class="chat-box" id="messages"></div>
     <div id="typingIndicator"></div>
-    <div class="inputArea">
-      <input type="text" id="messageInput" placeholder="Type message..." />
+
+    <div class="chat-input">
+      <input id="messageInput" type="text" placeholder="Type a message..." />
       <button id="sendBtn">Send</button>
     </div>
   </div>
