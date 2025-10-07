@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dedicated Two-Person Chat</title>
-    <!-- Load Tailwind CSS for modern styling -->
+    <title>Dedicated Two-Person Chat: Ashish & Maa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styling for a modern, sticky chat interface */
@@ -43,20 +42,17 @@
 </head>
 <body>
     <div class="chat-container">
-        <!-- Header -->
-        <header class="bg-indigo-600 text-white p-4 shadow-lg sticky top-0 z-10 rounded-b-xl">
-            <h1 class="text-xl font-bold">Secret Duo Chat 💬</h1>
+        <header class="bg-pink-600 text-white p-4 shadow-lg sticky top-0 z-10 rounded-b-xl">
+            <h1 class="text-xl font-bold">Ashish & Maa's Private Line 💖</h1>
             <p id="user-info" class="text-xs mt-1 opacity-75"></p>
         </header>
 
-        <!-- Messages Container -->
         <div id="messages-container">
-            <div id="loading-indicator" class="text-center p-4 text-indigo-500 font-semibold">
-                Connecting to the server...
+            <div id="loading-indicator" class="text-center p-4 text-pink-500 font-semibold">
+                Connecting and establishing identity...
             </div>
         </div>
 
-        <!-- Input Area (Sticky Footer) -->
         <footer class="bg-white p-4 border-t border-gray-200 sticky bottom-0">
             <div id="auth-check" class="text-center p-2 text-sm text-red-500 hidden">Authentication needed...</div>
             <div class="flex space-x-3">
@@ -64,13 +60,13 @@
                     type="text"
                     id="message-input"
                     placeholder="Type your message here..."
-                    class="flex-grow p-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 shadow-inner"
+                    class="flex-grow p-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition duration-150 shadow-inner"
                     autocomplete="off"
                     disabled
                 />
                 <button
                     id="send-button"
-                    class="bg-indigo-500 text-white font-semibold py-3 px-6 rounded-full hover:bg-indigo-600 transition duration-200 shadow-md hover:shadow-lg disabled:bg-indigo-300"
+                    class="bg-pink-500 text-white font-semibold py-3 px-6 rounded-full hover:bg-pink-600 transition duration-200 shadow-md hover:shadow-lg disabled:bg-pink-300"
                     disabled
                 >
                     Send
@@ -79,12 +75,11 @@
         </footer>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         // Mandatory Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, orderBy, addDoc, onSnapshot, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, orderBy, addDoc, onSnapshot, serverTimestamp, setLogLevel, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // IMPORTANT: Global variables provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-chat-app-id';
@@ -93,16 +88,15 @@
 
         let app, db, auth;
         let userId = null;
-        let isAuthReady = false;
+        let currentUserName = null; // Store the assigned name ("Ashish" or "Maa")
+        let userMap = {}; // Maps {uid: name} for all users
+        const ASSIGNED_NAMES = ['Ashish', 'Maa'];
 
         const messagesContainer = document.getElementById('messages-container');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
         const userInfo = document.getElementById('user-info');
         const loadingIndicator = document.getElementById('loading-indicator');
-
-        // Helper to shorten the user ID for display
-        const getShortUserId = (uid) => uid.substring(0, 6);
 
         // Utility to scroll to the bottom of the chat
         const scrollToBottom = () => {
@@ -136,8 +130,75 @@
 
             } catch (error) {
                 console.error("Error initializing Firebase or signing in:", error);
-                userInfo.textContent = "Authentication Error.";
+                userInfo.textContent = "Authentication Error. Check console.";
             }
+        };
+
+        // --- User Mapping Logic ---
+        
+        const USER_MAP_DOC_PATH = `artifacts/${appId}/public/data/chat_metadata/user_names`;
+        const USER_MAP_DOC_ID = 'user_map';
+
+        const setupUserIdentity = async (db, uid) => {
+            const userMapRef = doc(db, USER_MAP_DOC_PATH, USER_MAP_DOC_ID);
+            
+            // 1. Get the current user map
+            const userMapSnap = await getDoc(userMapRef);
+            let map = userMapSnap.exists() ? userMapSnap.data() : {};
+            userMap = map;
+
+            // 2. Check if the current user is already mapped
+            let nameToUidMap = {};
+            // Flip the map for easy lookup: {uid: name}
+            Object.keys(map).forEach(name => { nameToUidMap[map[name]] = name; });
+
+            if (nameToUidMap[uid]) {
+                // User is already mapped
+                currentUserName = nameToUidMap[uid];
+            } else {
+                // User is new, assign the next available name
+                
+                // Find names that have NOT been assigned yet
+                const assignedNames = Object.keys(map);
+                const availableNames = ASSIGNED_NAMES.filter(name => !assignedNames.includes(name));
+                
+                if (availableNames.length > 0) {
+                    // Assign the next available name (Ashish, then Maa)
+                    currentUserName = availableNames[0];
+                    map[currentUserName] = uid; // Store the new mapping
+                    userMap = map;
+
+                    // 3. Save the updated map back to Firestore
+                    await setDoc(userMapRef, map, { merge: true });
+                    console.log(`Assigned name: ${currentUserName} to user ID: ${uid}`);
+                } else {
+                    // All 2 names are taken, this is a third person/unrecognized ID
+                    currentUserName = 'Guest';
+                    // We don't save 'Guest' mapping to prevent pollution
+                    console.warn(`User ID ${uid} is a third party or unauthorized.`);
+                }
+            }
+            
+            // Wait for the next tick to ensure UI update
+            setTimeout(() => {
+                // Update UI elements
+                const nameDisplay = currentUserName !== 'Guest' 
+                    ? `<span class="font-mono text-sm bg-pink-700 p-1 rounded-md">${currentUserName}</span>`
+                    : `<span class="font-mono text-sm bg-gray-500 p-1 rounded-md">${currentUserName} (ID: ${uid.substring(0, 6)}...)</span>`;
+                
+                userInfo.innerHTML = `You are ${nameDisplay}`;
+                
+                if (currentUserName === 'Guest') {
+                    // Disable sending if the user is a third party
+                    messageInput.placeholder = "All chat slots are taken (Ashish & Maa).";
+                    messageInput.disabled = true;
+                    sendButton.disabled = true;
+                } else {
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    startChatListener(db, uid);
+                }
+            }, 0);
         };
 
         // --- Rendering Logic ---
@@ -145,20 +206,28 @@
         const renderMessage = (doc, currentUserId) => {
             const data = doc.data();
             const isMe = data.userId === currentUserId;
-            const shortId = getShortUserId(data.userId);
+            
+            // Look up the name from the map, default to ID if not found
+            let senderName = data.userId.substring(0, 6); // Fallback to short ID
+            Object.keys(userMap).forEach(name => {
+                if (userMap[name] === data.userId) {
+                    senderName = name;
+                }
+            });
+            
             const time = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...';
 
             // Determine colors and alignment
             const alignment = isMe ? 'self-end' : 'self-start';
-            const bgColor = isMe ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-800';
-            const nameColor = isMe ? 'text-indigo-700' : 'text-gray-500';
+            const bgColor = isMe ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-800';
+            const nameColor = isMe ? 'text-pink-700' : 'text-gray-500';
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message-box ${alignment} ${bgColor}`;
             
             const senderSpan = document.createElement('span');
             senderSpan.className = `text-xs font-semibold ${nameColor} mb-1 block ${isMe ? 'text-right' : 'text-left'}`;
-            senderSpan.textContent = isMe ? 'You' : shortId;
+            senderSpan.textContent = isMe ? 'You' : senderName;
 
             const textP = document.createElement('p');
             textP.className = 'text-sm';
@@ -178,9 +247,8 @@
         // --- Real-time Data Listener ---
 
         const startChatListener = (db, currentUserId) => {
-            // Define the specific chat path. This fixed path ensures both of the 'two' people
-            // using this instance share the same persistent conversation.
-            const chatCollectionPath = `artifacts/${appId}/public/data/two_person_chats/general-chat-room/messages`;
+            // Define the specific chat path for Ashish and Maa
+            const chatCollectionPath = `artifacts/${appId}/public/data/two_person_chats/ashish_and_maa/messages`;
             const chatRef = collection(db, chatCollectionPath);
             
             // Query for messages, ordered by timestamp
@@ -222,10 +290,10 @@
 
         const sendMessage = async () => {
             const message = messageInput.value.trim();
-            if (!message || !db || !userId) return;
+            if (!message || !db || !userId || currentUserName === 'Guest') return;
 
             // Define the specific chat path for writing
-            const chatCollectionPath = `artifacts/${appId}/public/data/two_person_chats/general-chat-room/messages`;
+            const chatCollectionPath = `artifacts/${appId}/public/data/two_person_chats/ashish_and_maa/messages`;
             const chatRef = collection(db, chatCollectionPath);
 
             const messagePayload = {
@@ -269,26 +337,17 @@
                 if (user) {
                     // User is signed in.
                     userId = user.uid;
-                    isAuthReady = true;
-
-                    // Update UI elements
-                    userInfo.innerHTML = `Your ID: <span class="font-mono text-sm bg-indigo-700 p-1 rounded-md">${userId}</span><br>
-                                          <span class="text-xs">Share your full ID with your partner so they know who you are.</span>`;
-                    
-                    messageInput.disabled = false;
-                    sendButton.disabled = false;
-                    
-                    // Start the real-time listener only once the user is authenticated
-                    startChatListener(db, userId);
+                    // Start the identity setup process which also enables chat listener/input
+                    setupUserIdentity(db, userId);
                     
                 } else {
                     // User is signed out.
                     userId = null;
-                    isAuthReady = false;
+                    currentUserName = null;
                     userInfo.textContent = "Not connected. Please refresh.";
                     messageInput.disabled = true;
                     sendButton.disabled = true;
-                    loadingIndicator.textContent = "Authentication failed.";
+                    if (loadingIndicator) loadingIndicator.textContent = "Authentication failed.";
                 }
             });
         };
