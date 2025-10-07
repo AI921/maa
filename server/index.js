@@ -56,11 +56,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("read_messages", (reader) => {
-    messages.forEach((m) => {
-      if (m.receiver === reader) m.read = true;
-    });
-    saveMessages();
+  messages.forEach((m) => {
+    if (m.receiver === reader) m.read = true;
   });
+  saveMessages();
+  io.emit("read_update", messages);
+});
+
 
   socket.on("disconnect", () => {
     for (let name in users) if (users[name] === socket.id) delete users[name];
