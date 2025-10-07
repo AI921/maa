@@ -37,7 +37,7 @@ messageInput.addEventListener("keypress", (e) => {
 function sendMessage() {
   const msg = messageInput.value.trim();
   if (!msg) return;
-  const newMsg = { sender: username, receiver, message: msg, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
+  const newMsg = { sender: username, receiver, message: msg };
   addMessage(newMsg, "you", true);
   socket.emit("send_message", newMsg);
   messageInput.value = "";
@@ -46,10 +46,14 @@ function sendMessage() {
 function addMessage(msgObj, type, sentNow = false) {
   const div = document.createElement("div");
   div.classList.add("message", type);
+
+  const tick = sentNow ? "✔️" : msgObj.read ? "✅✅" : "✔️";
+
   div.innerHTML = `
-    <div>${msgObj.message}</div>
-    <div class="timestamp">${msgObj.time} <span class="status">${sentNow ? "✔️" : msgObj.read ? "✅✅" : "✔️"}</span></div>
+    <span>${msgObj.message}</span>
+    <span class="status">${tick}</span>
   `;
+
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
@@ -66,4 +70,9 @@ socket.on("receive_message", (msg) => {
 socket.on("typing", (sender) => {
   typingIndicator.innerText = `${sender} is typing...`;
   setTimeout(() => (typingIndicator.innerText = ""), 1500);
+});
+
+socket.on("read_update", (updatedMsgs) => {
+  const msgElems = document.querySelectorAll(".message.you .status");
+  msgElems.forEach((el) => (el.innerText = "✅✅"));
 });
