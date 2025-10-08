@@ -1,161 +1,153 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: "Segoe UI", sans-serif;
-  background-color: #e5ddd5;
-  overflow: hidden;
-}
-
-.login-container {
-  max-width: 350px;
-  margin: 100px auto;
-  background: #fff;
-  padding: 25px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 0 12px rgba(0,0,0,0.15);
-}
-
-.login-container select,
-.login-container button {
-  width: 80%;
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-}
-
-.login-container button {
-  background: #25d366;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.login-container button:hover {
-  background: #1ebe5b;
-}
-
-.chat-container {
+  background: linear-gradient(135deg, #1d1d1d, #3b3b3b);
+  color: #fff;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
 }
 
-.chat-header {
-  background: #075e54;
-  color: white;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.container {
+  width: 100%;
+  max-width: 500px;
+  background: #222;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
 
-.chat-box {
-  flex: 1;
-  overflow-y: auto;
-  padding: 15px;
-  background: #efeae2;
+header {
   display: flex;
   flex-direction: column;
-  scroll-behavior: smooth;
-}
-
-.message {
-  max-width: 85%;
-  width: fit-content;
-  margin: 8px 0;
-  padding: 10px 14px;
-  border-radius: 10px;
-  display: inline-block;
-  word-wrap: break-word;
-  animation: fadeIn 0.2s ease-in;
-}
-
-.message.you {
-  background: #dcf8c6;
-  align-self: flex-end;
-  border-bottom-right-radius: 0;
-}
-
-.message.other {
-  background: #fff;
-  align-self: flex-start;
-  border-bottom-left-radius: 0;
-}
-
-.status {
-  font-size: 14px;
-  color: #777;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-
-.chat-input {
-  display: flex;
   align-items: center;
-  padding: 10px;
-  background: #f0f0f0;
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
+  background: #111;
+  padding: 12px;
 }
 
-.chat-input input {
-  flex: 1;
-  padding: 10px;
+.user-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.user-controls input {
+  padding: 6px 10px;
+  border-radius: 8px;
   border: none;
-  border-radius: 20px;
   outline: none;
-  font-size: 15px;
-  transition: 0.3s;
 }
 
-.chat-input input:focus {
-  background: #fff;
-  box-shadow: 0 0 4px #25d366;
-}
-
-.chat-input button {
-  margin-left: 10px;
-  background: #25d366;
+#joinBtn {
+  background: #00b4d8;
   border: none;
-  padding: 10px 20px;
-  border-radius: 50px;
   color: white;
+  border-radius: 8px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: 0.3s;
 }
 
-.chat-input button:hover {
-  background: #1ebe5b;
+#joinBtn:hover { background: #0077b6; }
+
+main {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
 }
 
-#typingIndicator {
-  font-size: 13px;
-  color: #555;
-  margin: 5px 15px;
-  font-style: italic;
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 8px;
 }
+
+.message {
+  margin-bottom: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #333;
+  animation: fadeIn 0.3s;
+}
+
+#inputBox {
+  display: flex;
+  gap: 8px;
+}
+
+#messageInput {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+#sendBtn {
+  background: #00b4d8;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#sendBtn:hover { background: #0077b6; }
+
+#callControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 8px;
+  padding: 8px;
+  background: #111;
+  border-radius: 12px;
+  animation: fadeIn 0.4s;
+}
+
+#callControls.hidden { display: none; }
+
+#callControls .buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+#callControls button {
+  border: none;
+  border-radius: 50%;
+  padding: 12px;
+  font-size: 20px;
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#callControls button:hover { transform: scale(1.1); }
+#callControls button.danger { background: #e63946; }
+
+#callTimer {
+  font-family: monospace;
+  margin-top: 5px;
+}
+
+.hidden { display: none; }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-@media (max-width: 600px) {
-  .chat-box {
-    padding: 8px;
-  }
-  .message {
-    max-width: 90%;
-    font-size: 15px;
-  }
-  .chat-input {
-    padding: 8px;
-  }
-  .chat-input input {
-    font-size: 14px;
+@media (max-width: 480px) {
+  .container {
+    max-width: 95%;
+    height: 95vh;
   }
 }
