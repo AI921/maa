@@ -1,38 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat - Ashish & Maa</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Your Chat App with Voice Call</title>
+  <link rel="stylesheet" href="/styles.css"> <!-- your existing CSS -->
+  <link rel="stylesheet" href="/call-style.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/call.js" defer></script>
+  <style>
+    /* small helper to keep main layout looking nice - optional */
+    body { background:#f3f6fb; color:#222; -webkit-font-smoothing:antialiased; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .container { max-width:1100px; margin:12px auto; padding:14px; }
+  </style>
 </head>
 <body>
-  <div class="login-container" id="loginDiv">
-    <h2>Welcome 👋</h2>
-    <select id="usernameSelect">
-      <option value="">Select User</option>
-      <option value="ashish">Ashish</option>
-      <option value="maa">Maa</option>
-    </select>
-    <button id="loginBtn">Login</button>
+  <div class="container">
+    <!-- Header / existing chat header -->
+    <header style="display:flex;gap:12px;align-items:center;">
+      <h1 style="margin:0;font-size:20px">Chat & Voice</h1>
+      <div style="opacity:0.7;font-size:13px">Two-person chat with voice calling</div>
+    </header>
+
+    <!-- The voice call UI (integrated) -->
+    <section id="voiceCallSection">
+      <div class="call-card">
+        <div class="call-left">
+          <div class="logo-anim" aria-hidden="true">
+            <!-- simple animated SVG icon -->
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="g" x1="0" x2="1">
+                  <stop offset="0" stop-color="#6EE7B7"/>
+                  <stop offset="1" stop-color="#60A5FA"/>
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="24" height="24" rx="6" fill="url(#g)"></rect>
+              <path d="M8 9a4 4 0 018 0v3a4 4 0 11-8 0V9z" fill="white" opacity="0.95"></path>
+              <circle cx="12" cy="7.5" r="1.2" fill="#fff"></circle>
+            </svg>
+          </div>
+        </div>
+
+        <div class="call-main">
+          <div class="call-row">
+            <input id="callRoom" class="input-room" placeholder="Room ID (share with peer)" />
+            <input id="callerName" class="input-name" placeholder="Your name (shown to peer)" />
+          </div>
+
+          <div class="call-row actions-row">
+            <div class="left-actions">
+              <button id="joinCallBtn" class="btn btn-primary">Call / Join</button>
+              <button id="muteBtn" class="btn btn-muted" disabled>
+                <span id="muteIcon">🔊</span> <span id="muteText">Mute</span>
+              </button>
+              <button id="leaveCallBtn" class="btn btn-danger" disabled>Hang Up</button>
+            </div>
+
+            <div class="right-meta">
+              <div id="callStatus" class="call-status">Idle</div>
+              <div id="callTimer" class="call-timer">00:00</div>
+            </div>
+          </div>
+
+          <audio id="remoteAudio" autoplay playsinline></audio>
+        </div>
+      </div>
+    </section>
+
+    <!-- Your existing chat UI goes below here -->
+    <main id="chatArea">
+      <!-- ...existing chat markup... -->
+    </main>
   </div>
-
-  <div class="chat-container" id="chatDiv" style="display:none;">
-    <div class="chat-header">
-      <h2 id="chatWith">Chat</h2>
-      <button id="logoutBtn">Logout</button>
-    </div>
-
-    <div class="chat-box" id="messages"></div>
-    <div id="typingIndicator"></div>
-
-    <div class="chat-input">
-      <input id="messageInput" type="text" placeholder="Type a message..." />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>
